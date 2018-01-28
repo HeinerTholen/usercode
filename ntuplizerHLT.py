@@ -96,7 +96,7 @@ def launchNtupleFromHLT(fileOutput,filesInput, secondaryFiles, maxEvents,preProc
     print "preProcessing: ",preProcessing
     print "firstEvent: ",firstEvent
 
-    isMC = 'SIM' in filesInput[0]
+    isMC = True  # 'SIM' in filesInput[0]
 
     ## Pre-processing
     if preProcessing:
@@ -126,8 +126,12 @@ def launchNtupleFromHLT(fileOutput,filesInput, secondaryFiles, maxEvents,preProc
     f = ROOT.TFile(fileOutput,"recreate")
     tree = ROOT.TTree("tree","tree")
 
-    fwLiteInputs = ["cmsswPreProcessing.root"]
-    if len(filesInput)==0: exit
+    if preProcessing:
+        fwLiteInputs = ["cmsswPreProcessing.root"]
+    else:
+        fwLiteInputs = filesInput
+    if not filesInput:
+        exit(-1)
     import os.path
     if not os.path.isfile(fwLiteInputs[0]):
         raise Exception( fwLiteInputs[0] + " does not exist.")
@@ -352,6 +356,7 @@ if __name__ == "__main__":
     fileOutput = "tree.root"
     maxEvents = 10000000
 
-    filesInput = ["file:/afs/cern.ch/work/h/htholen/private/cmsWorkingDir/CMSSW_10_0_0_pre3/src/HLTrigger/Configuration/test/SIM/HLT_tunedcontent_v1.root"]
+    filesInput = ["/pnfs/desy.de/cms/tier2/store/user/htholen/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5/GluGluHToBB_M125_13TeV_powheg_pythia8/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5_GluGluHToBB_M125_13TeV_powheg_pythia8/180126_120400/0000/HLT_tunedcontent_v2-1_79.root"]
+    filesInput = ["edm_tuple.root"]
 
     launchNtupleFromHLT(fileOutput,filesInput,secondaryFiles,maxEvents, preProcessing=False)

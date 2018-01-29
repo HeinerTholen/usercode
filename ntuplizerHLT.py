@@ -26,6 +26,7 @@ def FillVector(source,variables,minPt=pt_min):
                 elif name == "eta" :        var[variables.num[0]] = obj.eta()
                 elif name == "phi" :        var[variables.num[0]] = obj.phi()
                 elif name == "mass" :       var[variables.num[0]] = obj.mass()
+                elif name == "softdropmass":var[variables.num[0]] = obj.userFloat('ak8PFJetsCHSValueMap:ak8PFJetsCHSSoftDropMass')
                 elif name == "neHadEF" :    var[variables.num[0]] = obj.neutralHadronEnergyFraction()
                 elif name == "neEmEF" :     var[variables.num[0]] = obj.neutralEmEnergyFraction()
                 elif name == "chHadEF" :    var[variables.num[0]] = obj.chargedHadronEnergyFraction()
@@ -48,7 +49,7 @@ def FillBtag(btags_source, jets, jet_btags):
             jetB = btags.key(j).get()
             dR = deltaR(jetB.eta(),jetB.phi(),jets.eta[i],jets.phi[i])
             if dR<dRmax:
-                jet_btags[i] = max(0.,btags.value(j))
+                jet_btags[i] = max(-1.,btags.value(j))
                 dRmax = dR
 
 def Matching(phi, eta, jets):
@@ -170,7 +171,7 @@ def launchNtupleFromHLT(fileOutput,filesInput, secondaryFiles, maxEvents,preProc
     run         = SetVariable(tree,'run')
 
     hltpfJetsAK8    = BookVector(tree,"hltpfJetsAK8",['pt','eta','phi','mass','matchOff','matchGen','neHadEF','neEmEF','chHadEF','chEmEF','muEF','mult','neMult','chMult','doubleBTag'])
-    pfJetsAK8       = BookVector(tree,"pfJetsAK8",['pt','eta','phi','mass','matchOff','matchGen','neHadEF','neEmEF','chHadEF','chEmEF','muEF','mult','neMult','chMult','doubleBTag'])
+    pfJetsAK8       = BookVector(tree,"pfJetsAK8",['pt','eta','phi','mass','softdropmass','matchGen','neHadEF','neEmEF','chHadEF','chEmEF','muEF','mult','neMult','chMult','doubleBTag'])
 
     if isMC:
         pu                  = SetVariable(tree,'pu')

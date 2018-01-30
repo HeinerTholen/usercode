@@ -382,7 +382,6 @@ if __name__ == "__main__":
 
     input_chunks = list(list() for _ in xrange(n_cores))
     for fn, chunk in itertools.izip(filesInput, itertools.cycle(input_chunks)):
-        print fn
         chunk.append(fn)
 
     fileOutput_names = list('tree_%i.root'%i for i in xrange(n_cores))

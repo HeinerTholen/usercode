@@ -313,21 +313,23 @@ def launchNtupleFromHLT(fileOutput,filesInput, secondaryFiles, maxEvents,preProc
             #             if evt[0]==7826939:
             #                 print "newFlav:",genJetsNoNu.mcFlavour[i]
 
-            if bunchCrossing>=pileUp_source.productWithCheck().size() or pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing()!=0:
-                found=False
-                for bunchCrossing in range(pileUp_source.productWithCheck().size()):
-                    if pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing() == 0 :
-                        found=True
-                        break
-                if not found:
-                    Exception("Check pileupSummaryInfos!")
-                print "I'm using bunchCrossing=",bunchCrossing
-            pu[0] = pileUp_source.productWithCheck().at(bunchCrossing).getTrueNumInteractions()
-            ptHat[0]    = generator_source.product().qScale()
+            # FIXMEEEEEE uncomment me again
+            # if bunchCrossing>=pileUp_source.productWithCheck().size() or pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing()!=0:
+            #     found=False
+            #     for bunchCrossing in range(pileUp_source.productWithCheck().size()):
+            #         if pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing() == 0 :
+            #             found=True
+            #             break
+            #     if not found:
+            #         raise Exception("Check pileupSummaryInfos!")
+            #     print "I'm using bunchCrossing=",bunchCrossing
+
+            # pu[0] = pileUp_source.productWithCheck().at(bunchCrossing).getTrueNumInteractions()
+            # ptHat[0]    = generator_source.product().qScale()
 
             maxPUptHat[0] = -1
-            for ptHat_ in pileUp_source.productWithCheck().at(bunchCrossing).getPU_pT_hats():
-                maxPUptHat[0] = max(maxPUptHat[0],ptHat_)
+            # for ptHat_ in pileUp_source.productWithCheck().at(bunchCrossing).getPU_pT_hats():
+                # maxPUptHat[0] = max(maxPUptHat[0],ptHat_)
 
         # end if isMC:
 
@@ -350,14 +352,54 @@ def launchNtupleFromHLT(fileOutput,filesInput, secondaryFiles, maxEvents,preProc
 
 if __name__ == "__main__":
     #filesInput = ["root://eoscms.cern.ch//eos/cms/store/mc/PhaseIFall16DR/GluGluToRSGravitonToHHTo4B_M-450_narrow_13TeV-madgraph/GEN-SIM-RAW/FlatPU28to62HcalNZSRAW_90X_upgrade2017_realistic_v6_C1-v1/80000/F8161EEB-9810-E711-A85C-FA163E0B564E.root"]
-    filesInput = ["root://eoscms.cern.ch//eos/cms/store/mc/PhaseIFall16DR/GluGluToRSGravitonToHHTo4B_M-450_narrow_13TeV-madgraph/GEN-SIM-RAW/FlatPU28to62HcalNZSRAW_90X_upgrade2017_realistic_v6_C1-v1/80000/EAACC9D6-0F11-E711-A9B1-FA163EDAFEAB.root"]
-    filesInput = ["root://eoscms.cern.ch//eos/cms/store/data/Run2017C/HLTPhysics8/RAW/v1/000/301/959/00000/70AA2AD0-C08B-E711-9723-02163E011C82.root"]
+    # filesInput = ["root://eoscms.cern.ch//eos/cms/store/mc/PhaseIFall16DR/GluGluToRSGravitonToHHTo4B_M-450_narrow_13TeV-madgraph/GEN-SIM-RAW/FlatPU28to62HcalNZSRAW_90X_upgrade2017_realistic_v6_C1-v1/80000/EAACC9D6-0F11-E711-A9B1-FA163EDAFEAB.root"]
+    # filesInput = ["root://eoscms.cern.ch//eos/cms/store/data/Run2017C/HLTPhysics8/RAW/v1/000/301/959/00000/70AA2AD0-C08B-E711-9723-02163E011C82.root"]
 #    filesInput = ["file:/mnt/t3nfs01/data01/shome/sdonato/QCD470_GEN-SIM-RAW_PhaseI_83X_FlatPU28to62.root"]
     secondaryFiles = []
     fileOutput = "tree.root"
-    maxEvents = 10000000
+    maxEvents = -1
 
-    filesInput = ["/pnfs/desy.de/cms/tier2/store/user/htholen/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5/GluGluHToBB_M125_13TeV_powheg_pythia8/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5_GluGluHToBB_M125_13TeV_powheg_pythia8/180126_120400/0000/HLT_tunedcontent_v2-1_79.root"]
-    filesInput = ["edm_tuple.root"]
+    # filesInput = ["/pnfs/desy.de/cms/tier2/store/user/htholen/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5/GluGluHToBB_M125_13TeV_powheg_pythia8/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5_GluGluHToBB_M125_13TeV_powheg_pythia8/180126_120400/0000/HLT_tunedcontent_v2-1_79.root"]
+    # filesInput = ["edm_tuple.root"]
 
-    launchNtupleFromHLT(fileOutput,filesInput,secondaryFiles,maxEvents, preProcessing=False)
+    import os, sys, itertools, multiprocessing
+
+    if len(sys.argv) < 3:
+        print 'Nope.'
+        print 'It must be like this:'
+        print './ntuplizerHLT.py <n_cores> <input_dir>'
+        exit(-1)
+    input_path = sys.argv[2]
+    n_cores = int(sys.argv[1])
+    print 'using input from dir %s with %i cores.' % (input_path, n_cores)
+
+    filenames = os.listdir(input_path)
+    filesInput = list(
+        os.path.join(input_path, fn)
+        for fn in filenames
+        if fn.endswith('.root')
+    )
+
+    input_chunks = list(list() for _ in xrange(n_cores))
+    for fn, chunk in itertools.izip(filesInput, itertools.cycle(input_chunks)):
+        print fn
+        chunk.append(fn)
+
+    fileOutput_names = list('tree_%i.root'%i for i in xrange(n_cores))
+
+    args = tuple(
+        (outp, inp, [], -1, False)
+        for outp, inp in zip(fileOutput_names, input_chunks)
+    )
+
+    def proxy(arg):
+        return launchNtupleFromHLT(*arg)
+
+    pool = multiprocessing.Pool(n_cores)
+    for _ in pool.imap_unordered(proxy, args):
+        pass
+
+    # for debugging ....
+    ####################
+    # filesInput = ["edm_tuple.root"]
+    # launchNtupleFromHLT(fileOutput,filesInput,secondaryFiles,maxEvents, preProcessing=False)

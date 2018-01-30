@@ -362,24 +362,18 @@ if __name__ == "__main__":
     # filesInput = ["/pnfs/desy.de/cms/tier2/store/user/htholen/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5/GluGluHToBB_M125_13TeV_powheg_pythia8/HLT_EDMTuple_DoubleBTag_Hbb_Signal_v0p5_GluGluHToBB_M125_13TeV_powheg_pythia8/180126_120400/0000/HLT_tunedcontent_v2-1_79.root"]
     # filesInput = ["edm_tuple.root"]
 
-    import os, sys, itertools, multiprocessing
+    import os, sys, glob, itertools, multiprocessing
 
     if len(sys.argv) < 3:
         print 'Nope.'
         print 'It must be like this:'
-        print './ntuplizerHLT.py <n_cores> <input_dir>'
+        print './ntuplizerHLT.py <n_cores> "</path/to/*/files_*.root>"  <-- can use *, but don\'t forget quotes'
         exit(-1)
     input_path = sys.argv[2]
     n_cores = int(sys.argv[1])
     print 'using input from dir %s with %i cores.' % (input_path, n_cores)
 
-    filenames = os.listdir(input_path)
-    filesInput = list(
-        os.path.join(input_path, fn)
-        for fn in filenames
-        if fn.endswith('.root')
-    )
-
+    filesInput = glob.glob(input_path)
     input_chunks = list(list() for _ in xrange(n_cores))
     for fn, chunk in itertools.izip(filesInput, itertools.cycle(input_chunks)):
         chunk.append(fn)

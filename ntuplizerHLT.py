@@ -313,23 +313,23 @@ def launchNtupleFromHLT(fileOutput,filesInput, secondaryFiles, maxEvents,preProc
             #             if evt[0]==7826939:
             #                 print "newFlav:",genJetsNoNu.mcFlavour[i]
 
-            # FIXMEEEEEE uncomment me again
-            # if bunchCrossing>=pileUp_source.productWithCheck().size() or pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing()!=0:
-            #     found=False
-            #     for bunchCrossing in range(pileUp_source.productWithCheck().size()):
-            #         if pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing() == 0 :
-            #             found=True
-            #             break
-            #     if not found:
-            #         raise Exception("Check pileupSummaryInfos!")
-            #     print "I'm using bunchCrossing=",bunchCrossing
 
-            # pu[0] = pileUp_source.productWithCheck().at(bunchCrossing).getTrueNumInteractions()
-            # ptHat[0]    = generator_source.product().qScale()
+            if bunchCrossing>=pileUp_source.productWithCheck().size() or pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing()!=0:
+                found=False
+                for bunchCrossing in range(pileUp_source.productWithCheck().size()):
+                    if pileUp_source.productWithCheck().at(bunchCrossing).getBunchCrossing() == 0 :
+                        found=True
+                        break
+                if not found:
+                    raise Exception("Check pileupSummaryInfos!")
+                print "I'm using bunchCrossing=",bunchCrossing
+
+            pu[0] = pileUp_source.productWithCheck().at(bunchCrossing).getTrueNumInteractions()
+            ptHat[0]    = generator_source.product().qScale()
 
             maxPUptHat[0] = -1
-            # for ptHat_ in pileUp_source.productWithCheck().at(bunchCrossing).getPU_pT_hats():
-                # maxPUptHat[0] = max(maxPUptHat[0],ptHat_)
+            for ptHat_ in pileUp_source.productWithCheck().at(bunchCrossing).getPU_pT_hats():
+                maxPUptHat[0] = max(maxPUptHat[0],ptHat_)
 
         # end if isMC:
 
